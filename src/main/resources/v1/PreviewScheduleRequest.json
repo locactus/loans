@@ -1,0 +1,7 @@
+{
+  "includeSat": false,
+  "includeSun": false,
+  "includeHoliday": false,
+  "startDate": "",
+  "numberOfDays": 50
+}

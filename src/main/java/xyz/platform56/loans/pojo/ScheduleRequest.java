@@ -11,10 +11,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class ScheduleRequest {
 
-    private Boolean includeSat;
-    private Boolean includeSun;
-    private Boolean includeHoliday;
+    private Boolean includeSat = false;
+    private Boolean includeSun = false;
+    private Boolean includeHoliday = false;
     private Date startDate = new Date();
     private int numberOfDays = 50;
+    private double principal = 0.0;
+    private double interestRate = 15.0;
 
 }

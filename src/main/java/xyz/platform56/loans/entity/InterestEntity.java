@@ -14,25 +14,6 @@ import javax.persistence.*;
 @Data
 public class InterestEntity extends DomainObject {
 
-    @Column(name = "street", length = 100)
-    private String street;
-
-    @Column(name = "city", length = 100)
-    private String city;
-
-    @Column(name = "state", length = 100)
-    private String state;
-
-    @Column(name = "postcode", length = 100)
-    private String postcode;
-
-    @Column(name = "region", length = 100)
-    private String region;
-
-    @Column(name = "country", length = 100)
-    private String country;
-
-
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "primaryAddress")
-    private LoanEntity customer;
+    @Column(name = "loanRef", nullable = false, length = 100)
+    private String loanRef;
 }

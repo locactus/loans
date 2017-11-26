@@ -16,7 +16,7 @@ public interface LoanService {
 
     ScheduleResponse createSchedule(Long loanId, ScheduleRequest request);
 
-    ScheduleResponse previewSchedule(Long loanId, ScheduleRequest request);
+    ScheduleResponse previewSchedule(ScheduleRequest request);
 
     ScheduleResponse fetchSchedule(Long loanId);
 

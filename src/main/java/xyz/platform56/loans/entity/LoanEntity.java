@@ -15,37 +15,14 @@ import java.util.List;
 @Data
 public class LoanEntity extends DomainObject {
 
-    @Column(name = "first_name", nullable = false, length = 100)
-    private String firstName;
+    @Column(name = "loanRef", nullable = false, length = 100)
+    private String loanRef;
 
-
-    @Column(name = "last_name", nullable = false, length = 100)
-    private String lastName;
-
-    @Column(name = "primary_phone", length = 100)
-    private String primaryPhone;
-
-    @Column(name = "email",  length = 100)
-    private String email;
-
-    @JoinColumn(name = "primary_address_id",
-            referencedColumnName = "id")
-    @OneToOne(fetch = FetchType.LAZY)
-    private PrincipalEntity primaryAddress;
-
-
+    @Column(name = "status", nullable = false, length = 100)
+    private String status;
 
     public enum Paths {
-        name
-    }
-
-    public boolean equals(Object o) {
-        return ((this == o) || ((o != null) &&
-                (getClass() == o.getClass()) &&
-                firstName.equals(((LoanEntity) o).firstName)) &&
-                lastName.equals(((LoanEntity) o).lastName)
-
-        );
+        loanRef
     }
 
 }

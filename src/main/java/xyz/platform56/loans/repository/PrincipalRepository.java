@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository;
 import xyz.platform56.loans.entity.PrincipalEntity;
 
 @Repository
-public interface AddressRepository extends CrudRepository<PrincipalEntity, Long> {
+public interface PrincipalRepository extends CrudRepository<PrincipalEntity, Long> {
 
 
 }

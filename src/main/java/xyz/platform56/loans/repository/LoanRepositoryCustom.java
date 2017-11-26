@@ -6,7 +6,7 @@ import xyz.platform56.loans.pojo.SearchResponse;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CustomerRepositoryCustom {
+public interface LoanRepositoryCustom {
 
     SearchResponse<LoanEntity> search(String customerName, PaginationSearchRequest searchRequest);
 

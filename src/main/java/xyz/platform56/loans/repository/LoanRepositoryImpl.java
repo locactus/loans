@@ -19,14 +19,14 @@ import java.util.List;
 
 @Repository
 @Slf4j
-public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
+public class LoanRepositoryImpl implements LoanRepositoryCustom {
 
 
     @Autowired
     private EntityManager em;
 
     @Override
-    public SearchResponse<LoanEntity> search(String customerName, PaginationSearchRequest searchRequest) {
+    public SearchResponse<LoanEntity> search(String loanRef, PaginationSearchRequest searchRequest) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<LoanEntity> query = cb.createQuery(LoanEntity.class);
         List<Predicate> conditions = Lists.newArrayList();
@@ -34,8 +34,8 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
         Root<LoanEntity> customerRoot = query.from(LoanEntity.class);
         Predicate anyPredicate = null;
 
-        if (StringUtils.isNotEmpty(customerName)) {
-            anyPredicate = cb.like(cb.lower(customerRoot.<String>get(LoanEntity.Paths.name.name())), "%" + customerName.toLowerCase() + "%");
+        if (StringUtils.isNotEmpty(loanRef)) {
+            anyPredicate = cb.like(cb.lower(customerRoot.<String>get(LoanEntity.Paths.loanRef.name())), "%" + loanRef.toLowerCase() + "%");
             DBUtils.addPredicateToConditions(conditions, anyPredicate);
         }
         query.where(conditions.toArray(new Predicate[conditions.size()]));

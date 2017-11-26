@@ -33,6 +33,4 @@ public class PrincipalEntity extends DomainObject {
     private String country;
 
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "primaryAddress")
-    private LoanEntity customer;
 }

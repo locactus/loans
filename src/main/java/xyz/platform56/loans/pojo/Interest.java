@@ -17,7 +17,7 @@ public class Interest {
     // Percentage, Fixed Amount
     private String interestType;
 
-    // amount or percentage
+    // principal or percentage
     private Double interest;
 
 }

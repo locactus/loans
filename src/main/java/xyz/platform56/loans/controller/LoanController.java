@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
-@RequestMapping("/v1")
+@RequestMapping("/api/v1")
 @RestController
 @Slf4j
 public class LoanController extends BaseController {
@@ -44,11 +44,10 @@ public class LoanController extends BaseController {
         return new ResponseEntity<ScheduleResponse>(loanService.createSchedule(loanId, request), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{loanId}/schedules", method = RequestMethod.OPTIONS)
+    @RequestMapping(value = "loans/schedules/preview", method = RequestMethod.OPTIONS)
     @ResponseBody
-    public ResponseEntity<ScheduleResponse> previewSchedule(@PathVariable Long loanId,
-                                                           @RequestBody @Valid ScheduleRequest request ) {
-        return new ResponseEntity<ScheduleResponse>(loanService.previewSchedule(loanId, request), HttpStatus.OK);
+    public ResponseEntity<ScheduleResponse> previewSchedule(@RequestBody @Valid ScheduleRequest request ) {
+        return new ResponseEntity<ScheduleResponse>(loanService.previewSchedule(request), HttpStatus.OK);
     }
 
     @RequestMapping(value = "loans/{loanId}/ids", method = RequestMethod.GET)

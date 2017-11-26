@@ -1,6 +1,7 @@
 package xyz.platform56.loans.service;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import xyz.platform56.loans.component.DateComponent;
 import xyz.platform56.loans.entity.LoanEntity;
@@ -8,19 +9,18 @@ import xyz.platform56.loans.exception.ApiException;
 import xyz.platform56.loans.exception.NotFoundException;
 import xyz.platform56.loans.pojo.*;
 
-import xyz.platform56.loans.repository.AddressRepository;
 import xyz.platform56.loans.repository.LoanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import xyz.platform56.loans.repository.IdentificationRepository;
 import xyz.platform56.loans.utils.ModelMapperBasedTransformer;
 
+import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 
@@ -31,12 +31,6 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     @Autowired
     private LoanRepository loanRepository;
 
-    @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
-    private IdentificationRepository identificationRepository;
-
 
     @Autowired
     private ModelMapper modelMapper;
@@ -46,8 +40,8 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
 
     @Autowired
-    @Qualifier("customerEntityCustomerModelMapperBasedTransformer")
-    private ModelMapperBasedTransformer<LoanEntity, LoanDetails> customerEntityCustomerModelMapperBasedTransformer;
+    @Qualifier("loanEntityToLoanDetailsModelMapperBasedTransformer")
+    private ModelMapperBasedTransformer<LoanEntity, LoanDetails> loanEntityToLoanDetailsModelMapperBasedTransformer;
 
 
     private static final String NOT_FOUND_ERROR_STATUS = "Not Found";
@@ -57,7 +51,7 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     @Override
     public SearchResponse search(String customerName, PaginationSearchRequest searchRequest) {
         SearchResponse<LoanEntity> searchResponse = loanRepository.search(customerName, searchRequest);
-        return searchResponseConverter.buildSearchResponse(searchResponse, customerEntityCustomerModelMapperBasedTransformer);
+        return searchResponseConverter.buildSearchResponse(searchResponse, loanEntityToLoanDetailsModelMapperBasedTransformer);
     }
 
     @Override
@@ -100,25 +94,45 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     }
 
     @Override
-    public ScheduleResponse previewSchedule(Long loanId, ScheduleRequest request) {
-        LocalDate startDate = request.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    public ScheduleResponse previewSchedule(ScheduleRequest request) {
+        LocalDate startDate = request.getStartDate() != null && StringUtils.isNotEmpty(request.getStartDate().toString()) ?
+                request.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : LocalDate.now();
         List<DayOfWeek> dayOfWeeks = Lists.newArrayList();
-        dayOfWeeks.add(DayOfWeek.SATURDAY);
-        dayOfWeeks.add(DayOfWeek.SUNDAY);
+
+        if (!request.getIncludeSat()) {
+            dayOfWeeks.add(DayOfWeek.SATURDAY);
+        }
+        if (!request.getIncludeSun()) {
+            dayOfWeeks.add(DayOfWeek.SUNDAY);
+        }
+
         List<LocalDate> holidayDates = Lists.newArrayList();
+        List<LineSchedule> lineSchedules = Lists.newArrayList();
+
         List<LocalDate> localDates = dateComponent.generateScheduleDate(startDate, request.getNumberOfDays(),
                 dayOfWeeks, holidayDates);
 
-        List<LineSchedule> lineSchedules = Lists.newArrayList();
+        // Computation of InterestRate
+        double interestAmount = request.getPrincipal() *  (request.getInterestRate() / 100);
+        double theNewPrincipal = request.getPrincipal() + interestAmount;
+        double perDayAmount = theNewPrincipal / request.getNumberOfDays();
 
         for (LocalDate localDate : localDates) {
-            lineSchedules.add(LineSchedule.builder().paymentDate(localDate).build());
+            lineSchedules.add(LineSchedule.builder()
+                    .amount(perDayAmount)
+                    .status("UNPAID")
+                    .paymentDate(localDate).build());
         }
 
         return ScheduleResponse.builder().
                 includeHoliday(request.getIncludeHoliday()).
                 includeSat(request.getIncludeSat()).
                 includeSun(request.getIncludeSun()).
+                startDate(startDate).
+                principal(request.getPrincipal()).
+                interestRate(request.getInterestRate()).
+                numberOfDays(request.getNumberOfDays()).
+                totalAmount(theNewPrincipal).
                 schedules(lineSchedules)
                 .build();
     }

@@ -11,7 +11,7 @@ public class ConverterBasedTransformer<S, D> implements Function<S, D> {
 
 
     @Autowired
-    @Qualifier("customersConversionService")
+    @Qualifier("loansConversionService")
     private ConversionService conversionService;
 
     private Class<D> targetType;
