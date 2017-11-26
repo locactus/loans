@@ -2,18 +2,14 @@ package xyz.platform56.loans.service;
 
 import com.google.common.collect.Lists;
 import org.modelmapper.ModelMapper;
-import xyz.platform56.loans.entity.AddressEntity;
-import xyz.platform56.loans.entity.CustomerEntity;
-import xyz.platform56.loans.entity.IdentificationEntity;
+import xyz.platform56.loans.component.DateComponent;
+import xyz.platform56.loans.entity.LoanEntity;
 import xyz.platform56.loans.exception.ApiException;
 import xyz.platform56.loans.exception.NotFoundException;
-import xyz.platform56.loans.pojo.LoanDetails;
-import xyz.platform56.loans.pojo.Identification;
-import xyz.platform56.loans.pojo.PaginationSearchRequest;
-import xyz.platform56.loans.pojo.SearchResponse;
+import xyz.platform56.loans.pojo.*;
 
 import xyz.platform56.loans.repository.AddressRepository;
-import xyz.platform56.loans.repository.CustomerRepository;
+import xyz.platform56.loans.repository.LoanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -21,8 +17,10 @@ import org.springframework.stereotype.Service;
 import xyz.platform56.loans.repository.IdentificationRepository;
 import xyz.platform56.loans.utils.ModelMapperBasedTransformer;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -31,7 +29,7 @@ import java.util.List;
 public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Autowired
-    private CustomerRepository customerRepository;
+    private LoanRepository loanRepository;
 
     @Autowired
     private AddressRepository addressRepository;
@@ -43,15 +41,13 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private DateComponent dateComponent;
+
 
     @Autowired
     @Qualifier("customerEntityCustomerModelMapperBasedTransformer")
-    private ModelMapperBasedTransformer<CustomerEntity, LoanDetails> customerEntityCustomerModelMapperBasedTransformer;
-
-    @Autowired
-    @Qualifier("identificationEntityIdentificationPojoModelMapperBasedTransformer")
-    private ModelMapperBasedTransformer<IdentificationEntity, Identification>
-            identificationEntityIdentificationPojoModelMapperBasedTransformer;
+    private ModelMapperBasedTransformer<LoanEntity, LoanDetails> customerEntityCustomerModelMapperBasedTransformer;
 
 
     private static final String NOT_FOUND_ERROR_STATUS = "Not Found";
@@ -60,28 +56,23 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Override
     public SearchResponse search(String customerName, PaginationSearchRequest searchRequest) {
-        SearchResponse<CustomerEntity> searchResponse = customerRepository.search(customerName, searchRequest);
+        SearchResponse<LoanEntity> searchResponse = loanRepository.search(customerName, searchRequest);
         return searchResponseConverter.buildSearchResponse(searchResponse, customerEntityCustomerModelMapperBasedTransformer);
     }
 
     @Override
     public LoanDetails get(Long entityId) {
-        CustomerEntity customerEntity = customerRepository.findOne(entityId);
-        checkEntity(customerEntity);
-        return modelMapper.map(customerEntity, LoanDetails.class);
+        LoanEntity loanEntity = loanRepository.findOne(entityId);
+        checkEntity(loanEntity);
+        return modelMapper.map(loanEntity, LoanDetails.class);
     }
 
     @Override
     public LoanDetails create(LoanDetails request) {
-        CustomerEntity customerEntity = modelMapper.map(request, CustomerEntity.class);
+        LoanEntity loanEntity = modelMapper.map(request, LoanEntity.class);
         try {
 
-            customerEntity = customerRepository.save(customerEntity);
-            AddressEntity addressEntity = modelMapper.map(request.getAddress(), AddressEntity.class);
-            addressEntity = addressRepository.save(addressEntity);
-            addressEntity.setCustomer(customerEntity);
-            customerEntity.setPrimaryAddress(addressEntity);
-            customerEntity = customerRepository.save(customerEntity);
+            loanEntity = loanRepository.save(loanEntity);
 
         } catch (org.springframework.dao.DataIntegrityViolationException ex) {
             if (ex.getMostSpecificCause().toString().contains("ConstraintViolation")) {
@@ -90,61 +81,64 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
                 throw new ApiException("400", "Invalid Data");
             }
         }
-        return modelMapper.map(customerEntity, LoanDetails.class);
+        return modelMapper.map(loanEntity, LoanDetails.class);
     }
 
     @Override
     public LoanDetails update(Long entityId, LoanDetails request) {
-        CustomerEntity customerEntity = customerRepository.findOne(entityId);
-        checkEntity(customerEntity);
-        customerEntity = modelMapper.map(request, CustomerEntity.class);
-        AddressEntity addressEntity = modelMapper.map(request.getAddress(), AddressEntity.class);
-        addressEntity = addressRepository.save(addressEntity);
-        addressEntity.setCustomer(customerEntity);
-        customerEntity.setPrimaryAddress(addressEntity);
-        customerEntity = customerRepository.save(customerEntity);
-        return modelMapper.map(customerEntity, LoanDetails.class);
+        LoanEntity loanEntity = loanRepository.findOne(entityId);
+        checkEntity(loanEntity);
+        loanEntity = modelMapper.map(request, LoanEntity.class);
+        ;
+        loanEntity = loanRepository.save(loanEntity);
+        return modelMapper.map(loanEntity, LoanDetails.class);
     }
 
     @Override
-    public Identification createId(Long customerId, Identification request) {
-        CustomerEntity customerEntity = customerRepository.findOne(customerId);
-        checkEntity(customerEntity);
-
-        IdentificationEntity identificationEntity = modelMapper.map(request, IdentificationEntity.class);
-        identificationEntity.setCustomer(customerEntity);
-        identificationEntity = identificationRepository.save(identificationEntity);
-       if ( customerEntity.getIdentifications() == null)
-       {
-           customerEntity.setIdentifications(new ArrayList<>());
-           customerEntity.getIdentifications().add(identificationEntity);
-       } else {
-           customerEntity.getIdentifications().add(identificationEntity);
-       }
-
-        customerRepository.save(customerEntity);
-        return modelMapper.map(identificationEntity, Identification.class);
+    public ScheduleResponse createSchedule(Long loanId, ScheduleRequest request) {
+        return null;
     }
 
     @Override
-    public List<Identification> fetchIds(Long customerId) {
-        CustomerEntity customerEntity = customerRepository.findOne(customerId);
-        checkEntity(customerEntity);
-        List<IdentificationEntity> identifications = customerEntity.getIdentifications();
-        if (identifications == null) {
-            return Collections.emptyList();
+    public ScheduleResponse previewSchedule(Long loanId, ScheduleRequest request) {
+        LocalDate startDate = request.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        List<DayOfWeek> dayOfWeeks = Lists.newArrayList();
+        dayOfWeeks.add(DayOfWeek.SATURDAY);
+        dayOfWeeks.add(DayOfWeek.SUNDAY);
+        List<LocalDate> holidayDates = Lists.newArrayList();
+        List<LocalDate> localDates = dateComponent.generateScheduleDate(startDate, request.getNumberOfDays(),
+                dayOfWeeks, holidayDates);
+
+        List<LineSchedule> lineSchedules = Lists.newArrayList();
+
+        for (LocalDate localDate : localDates) {
+            lineSchedules.add(LineSchedule.builder().paymentDate(localDate).build());
         }
-        return Lists.transform(identifications, identificationEntityIdentificationPojoModelMapperBasedTransformer);
+
+        return ScheduleResponse.builder().
+                includeHoliday(request.getIncludeHoliday()).
+                includeSat(request.getIncludeSat()).
+                includeSun(request.getIncludeSun()).
+                schedules(lineSchedules)
+                .build();
     }
+
+
+    @Override
+    public ScheduleResponse fetchSchedule(Long loanId) {
+        return null;
+    }
+
 
     @Override
     public void delete(Long entityId) {
-        CustomerEntity entityDataEntity = customerRepository.findOne(entityId);
+        LoanEntity entityDataEntity = loanRepository.findOne(entityId);
         checkEntity(entityDataEntity);
-        customerRepository.delete(entityId);
+        loanRepository.delete(entityId);
     }
 
-    private void checkEntity(CustomerEntity entityDataEntity) {
+
+    private void checkEntity(LoanEntity entityDataEntity) {
         if (entityDataEntity == null) {
             throw new NotFoundException(NOT_FOUND_ERROR_STATUS, NOT_FOUND_ERROR_MESSAGE);
         }

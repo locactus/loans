@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "address")
+@Table(name = "principal")
 @lombok.Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class AddressEntity extends DomainObject {
+public class PrincipalEntity extends DomainObject {
 
     @Column(name = "street", length = 100)
     private String street;
@@ -34,5 +34,5 @@ public class AddressEntity extends DomainObject {
 
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "primaryAddress")
-    private CustomerEntity customer;
+    private LoanEntity customer;
 }

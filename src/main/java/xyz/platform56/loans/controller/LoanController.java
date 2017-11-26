@@ -1,19 +1,14 @@
 package xyz.platform56.loans.controller;
 
 
-import xyz.platform56.loans.pojo.LoanDetails;
-import xyz.platform56.loans.pojo.Identification;
-import xyz.platform56.loans.pojo.PaginationSearchRequest;
-import xyz.platform56.loans.pojo.SearchResponse;
+import xyz.platform56.loans.pojo.*;
 import xyz.platform56.loans.service.LoanService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
-import java.util.List;
 
 @RequestMapping("/v1")
 @RestController
@@ -31,31 +26,36 @@ public class LoanController extends BaseController {
     @RequestMapping(value = "loans", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<SearchResponse> search(
-            @RequestParam(value = "customerName", required = false, defaultValue = "") String customerName,
+            @RequestParam(value = "loanRef", required = false, defaultValue = "") String loanRef,
             @ModelAttribute @Valid PaginationSearchRequest searchRequest) {
-        return new ResponseEntity<SearchResponse>(loanService.search(customerName, searchRequest), HttpStatus.OK);
+        return new ResponseEntity<SearchResponse>(loanService.search(loanRef, searchRequest), HttpStatus.OK);
     }
 
     @RequestMapping(value = "loans/{loanId}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<LoanDetails> get(@PathVariable Long customerId) {
-        return new ResponseEntity<LoanDetails>(loanService.get(customerId), HttpStatus.OK);
+    public ResponseEntity<LoanDetails> get(@PathVariable Long loanId) {
+        return new ResponseEntity<LoanDetails>(loanService.get(loanId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{customerId}/ids", method = RequestMethod.POST)
+    @RequestMapping(value = "loans/{loanId}/schedules", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Identification> addIdentifications(@PathVariable Long customerId,
-                                                       @RequestBody @Valid Identification request ) {
-        return new ResponseEntity<Identification>(loanService.createId(customerId, request), HttpStatus.OK);
+    public ResponseEntity<ScheduleResponse> createSchedule(@PathVariable Long loanId,
+                                                          @RequestBody @Valid ScheduleRequest request ) {
+        return new ResponseEntity<ScheduleResponse>(loanService.createSchedule(loanId, request), HttpStatus.OK);
     }
 
-
-    @RequestMapping(value = "loans/{customerId}/ids", method = RequestMethod.GET)
+    @RequestMapping(value = "loans/{loanId}/schedules", method = RequestMethod.OPTIONS)
     @ResponseBody
-    public ResponseEntity<List<Identification>> fetchIdentifications(@PathVariable Long customerId) {
-        return new ResponseEntity<List<Identification>>(loanService.fetchIds(customerId), HttpStatus.OK);
+    public ResponseEntity<ScheduleResponse> previewSchedule(@PathVariable Long loanId,
+                                                           @RequestBody @Valid ScheduleRequest request ) {
+        return new ResponseEntity<ScheduleResponse>(loanService.previewSchedule(loanId, request), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "loans/{loanId}/ids", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<ScheduleResponse> fetchSchedule(@PathVariable Long loanId) {
+        return new ResponseEntity<ScheduleResponse>(loanService.fetchSchedule(loanId), HttpStatus.OK);
+    }
 
     @RequestMapping(value = "loans", method = RequestMethod.POST)
     @ResponseBody
@@ -63,16 +63,16 @@ public class LoanController extends BaseController {
         return new ResponseEntity<LoanDetails>(loanService.create(request), HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "loans/{customerId}", method = RequestMethod.PUT)
+    @RequestMapping(value = "loans/{loanId}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<LoanDetails> update(@PathVariable Long customerId, @RequestBody @Valid LoanDetails request) {
-        return new ResponseEntity<LoanDetails>(loanService.update(customerId, request), HttpStatus.OK);
+    public ResponseEntity<LoanDetails> update(@PathVariable Long loanId, @RequestBody @Valid LoanDetails request) {
+        return new ResponseEntity<LoanDetails>(loanService.update(loanId, request), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{customerId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "loans/{loanId}", method = RequestMethod.DELETE)
     @ResponseBody
-    public Object delete(@PathVariable Long customerId) {
-        loanService.delete(customerId);
+    public Object delete(@PathVariable Long loanId) {
+        loanService.delete(loanId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

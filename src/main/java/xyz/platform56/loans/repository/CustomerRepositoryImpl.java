@@ -1,6 +1,6 @@
 package xyz.platform56.loans.repository;
 
-import xyz.platform56.loans.entity.CustomerEntity;
+import xyz.platform56.loans.entity.LoanEntity;
 import xyz.platform56.loans.pojo.PaginationSearchRequest;
 import xyz.platform56.loans.pojo.SearchResponse;
 import com.google.common.collect.Lists;
@@ -26,22 +26,22 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
     private EntityManager em;
 
     @Override
-    public SearchResponse<CustomerEntity> search(String customerName, PaginationSearchRequest searchRequest) {
+    public SearchResponse<LoanEntity> search(String customerName, PaginationSearchRequest searchRequest) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<CustomerEntity> query = cb.createQuery(CustomerEntity.class);
+        CriteriaQuery<LoanEntity> query = cb.createQuery(LoanEntity.class);
         List<Predicate> conditions = Lists.newArrayList();
 
-        Root<CustomerEntity> customerRoot = query.from(CustomerEntity.class);
+        Root<LoanEntity> customerRoot = query.from(LoanEntity.class);
         Predicate anyPredicate = null;
 
         if (StringUtils.isNotEmpty(customerName)) {
-            anyPredicate = cb.like(cb.lower(customerRoot.<String>get(CustomerEntity.Paths.name.name())), "%" + customerName.toLowerCase() + "%");
+            anyPredicate = cb.like(cb.lower(customerRoot.<String>get(LoanEntity.Paths.name.name())), "%" + customerName.toLowerCase() + "%");
             DBUtils.addPredicateToConditions(conditions, anyPredicate);
         }
         query.where(conditions.toArray(new Predicate[conditions.size()]));
         DBUtils.addSort(cb, query, customerRoot, "id");
         query.distinct(true);
-        List<CustomerEntity> entities = em.createQuery(query)
+        List<LoanEntity> entities = em.createQuery(query)
                 .setFirstResult(searchRequest.getStart()).setMaxResults(searchRequest.getCount()).getResultList();
         Long total = 0L;
         //count query
@@ -50,7 +50,7 @@ public class CustomerRepositoryImpl implements CustomerRepositoryCustom {
         countQuery.select(cb.countDistinct(customerRoot));
         countQuery.where(conditions.toArray(new Predicate[conditions.size()]));
         total = em.createQuery(countQuery).getSingleResult();
-        return new SearchResponse<CustomerEntity>(searchRequest.getStart(), searchRequest.getCount(), total.intValue(), entities);
+        return new SearchResponse<LoanEntity>(searchRequest.getStart(), searchRequest.getCount(), total.intValue(), entities);
     }
 
 

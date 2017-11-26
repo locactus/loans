@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class CustomerEntity extends DomainObject {
+public class LoanEntity extends DomainObject {
 
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
@@ -31,14 +31,7 @@ public class CustomerEntity extends DomainObject {
     @JoinColumn(name = "primary_address_id",
             referencedColumnName = "id")
     @OneToOne(fetch = FetchType.LAZY)
-    private AddressEntity primaryAddress;
-
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "identification_id",
-            referencedColumnName = "id",
-            foreignKey = @ForeignKey(name = "identification_id_fk")
-    )
-    private List<IdentificationEntity> identifications;
+    private PrincipalEntity primaryAddress;
 
 
 
@@ -49,8 +42,8 @@ public class CustomerEntity extends DomainObject {
     public boolean equals(Object o) {
         return ((this == o) || ((o != null) &&
                 (getClass() == o.getClass()) &&
-                firstName.equals(((CustomerEntity) o).firstName)) &&
-                lastName.equals(((CustomerEntity) o).lastName)
+                firstName.equals(((LoanEntity) o).firstName)) &&
+                lastName.equals(((LoanEntity) o).lastName)
 
         );
     }

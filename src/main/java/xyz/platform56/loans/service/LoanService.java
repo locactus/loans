@@ -1,9 +1,6 @@
 package xyz.platform56.loans.service;
 
-import xyz.platform56.loans.pojo.LoanDetails;
-import xyz.platform56.loans.pojo.Identification;
-import xyz.platform56.loans.pojo.PaginationSearchRequest;
-import xyz.platform56.loans.pojo.SearchResponse;
+import xyz.platform56.loans.pojo.*;
 
 import java.util.List;
 
@@ -11,15 +8,17 @@ public interface LoanService {
 
     SearchResponse search(String customerName, PaginationSearchRequest searchRequest);
 
-    LoanDetails get(Long customerId);
+    LoanDetails get(Long loanId);
 
     LoanDetails create(LoanDetails request);
 
-    LoanDetails update(Long customerId, LoanDetails request);
+    LoanDetails update(Long loanId, LoanDetails request);
 
-    Identification createId(Long customerId, Identification request);
+    ScheduleResponse createSchedule(Long loanId, ScheduleRequest request);
 
-    List<Identification> fetchIds(Long customerId);
+    ScheduleResponse previewSchedule(Long loanId, ScheduleRequest request);
 
-    void delete(Long customerId);
+    ScheduleResponse fetchSchedule(Long loanId);
+
+    void delete(Long loanId);
 }
