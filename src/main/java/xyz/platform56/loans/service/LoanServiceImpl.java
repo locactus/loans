@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import xyz.platform56.loans.component.DateComponent;
 import xyz.platform56.loans.entity.LoanEntity;
+import xyz.platform56.loans.entity.ScheduleEntity;
 import xyz.platform56.loans.exception.ApiException;
 import xyz.platform56.loans.exception.NotFoundException;
 import xyz.platform56.loans.pojo.*;
@@ -16,11 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import xyz.platform56.loans.utils.ModelMapperBasedTransformer;
 
-import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 
@@ -41,11 +40,11 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Autowired
     @Qualifier("loanEntityToLoanDetailsModelMapperBasedTransformer")
-    private ModelMapperBasedTransformer<LoanEntity, LoanDetails> loanEntityToLoanDetailsModelMapperBasedTransformer;
+    private ModelMapperBasedTransformer<LoanEntity, LoanDetailsResponse> loanEntityToLoanDetailsModelMapperBasedTransformer;
 
 
     private static final String NOT_FOUND_ERROR_STATUS = "Not Found";
-    private static final String NOT_FOUND_ERROR_MESSAGE = "No LoanDetails Found";
+    private static final String NOT_FOUND_ERROR_MESSAGE = "No LoanDetailsRequest Found";
 
 
     @Override
@@ -55,14 +54,14 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     }
 
     @Override
-    public LoanDetails get(Long entityId) {
+    public LoanDetailsResponse get(Long entityId) {
         LoanEntity loanEntity = loanRepository.findOne(entityId);
         checkEntity(loanEntity);
-        return modelMapper.map(loanEntity, LoanDetails.class);
+        return modelMapper.map(loanEntity, LoanDetailsResponse.class);
     }
 
     @Override
-    public LoanDetails create(LoanDetails request) {
+    public LoanDetailsResponse create(LoanDetailsRequest request) {
         LoanEntity loanEntity = modelMapper.map(request, LoanEntity.class);
         try {
 
@@ -75,21 +74,25 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
                 throw new ApiException("400", "Invalid Data");
             }
         }
-        return modelMapper.map(loanEntity, LoanDetails.class);
+        return modelMapper.map(loanEntity, LoanDetailsResponse.class);
     }
 
     @Override
-    public LoanDetails update(Long entityId, LoanDetails request) {
+    public LoanDetailsResponse update(Long entityId, LoanDetailsRequest request) {
         LoanEntity loanEntity = loanRepository.findOne(entityId);
         checkEntity(loanEntity);
         loanEntity = modelMapper.map(request, LoanEntity.class);
         ;
         loanEntity = loanRepository.save(loanEntity);
-        return modelMapper.map(loanEntity, LoanDetails.class);
+        return modelMapper.map(loanEntity, LoanDetailsResponse.class);
     }
 
     @Override
     public ScheduleResponse createSchedule(Long loanId, ScheduleRequest request) {
+        ScheduleResponse previewSchedule = this.previewSchedule(request);
+        ScheduleEntity scheduleEntity = modelMapper.map(previewSchedule, ScheduleEntity.class);
+
+        log.info("XX");
         return null;
     }
 

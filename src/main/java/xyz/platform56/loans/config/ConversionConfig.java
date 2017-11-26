@@ -32,8 +32,8 @@ public class ConversionConfig {
 
 
     @Bean(name = "loanEntityToLoanDetailsModelMapperBasedTransformer")
-    public ModelMapperBasedTransformer<LoanEntity, LoanDetails> loanEntityToLoanDetailsModelMapperBasedTransformer() {
-        return new ModelMapperBasedTransformer<>(LoanDetails.class);
+    public ModelMapperBasedTransformer<LoanEntity, LoanDetailsResponse> loanEntityToLoanDetailsModelMapperBasedTransformer() {
+        return new ModelMapperBasedTransformer<>(LoanDetailsResponse.class);
 
     }
 

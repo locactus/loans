@@ -12,9 +12,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoanDetails {
-
-    private Long id;
+public class LoanDetailsRequest {
 
     @NotNull(message = "'externalRef' is required.")
     @NotEmpty(message = "'externalRef' is required.")
@@ -24,19 +22,16 @@ public class LoanDetails {
     @NotEmpty(message = "'customerRef' is required.")
     private String customerRef;
 
-    private String loanProductRef;
-
     private String paymentType;
 
-    @Valid
-    private Principal principal;
+    private String disbursementType;
 
-    @Valid
-    private Duration duration;
+    private double principal;
 
-    private Date createdOn;
+    private double interestRate;
 
-    private Date updatedOn;
+    private Date releaseDate;
+
 
 
 }

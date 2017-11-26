@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,11 +16,30 @@ import java.util.List;
 @Data
 public class LoanEntity extends DomainObject {
 
-    @Column(name = "loanRef", nullable = false, length = 100)
-    private String loanRef;
+
+    @Column(name = "external_ref", nullable = false, length = 100)
+    private String externalRef;
+
+    @Column(name = "customer_ref", nullable = false, length = 100)
+    private String customerRef;
+
+    @Column(name = "payment_type", nullable = false, length = 100)
+    private String paymentType = "CASH";
+
+    @Column(name = "disbursement_type", nullable = false, length = 100)
+    private String disbursementType = "CASH";
+
+    @Column(name = "principal", nullable = false, length = 100)
+    private double principal;
+
+    @Column(name = "interest_rate", nullable = false, length = 100)
+    private double interestRate;
 
     @Column(name = "status", nullable = false, length = 100)
-    private String status;
+    private String status = "INACTIVE";
+
+    @Column(name = "release_date", length = 100)
+    private Date releaseDate;
 
     public enum Paths {
         loanRef

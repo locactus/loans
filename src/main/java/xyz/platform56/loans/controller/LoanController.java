@@ -33,8 +33,8 @@ public class LoanController extends BaseController {
 
     @RequestMapping(value = "loans/{loanId}", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<LoanDetails> get(@PathVariable Long loanId) {
-        return new ResponseEntity<LoanDetails>(loanService.get(loanId), HttpStatus.OK);
+    public ResponseEntity<LoanDetailsResponse> get(@PathVariable Long loanId) {
+        return new ResponseEntity<LoanDetailsResponse>(loanService.get(loanId), HttpStatus.OK);
     }
 
     @RequestMapping(value = "loans/{loanId}/schedules", method = RequestMethod.POST)
@@ -58,14 +58,14 @@ public class LoanController extends BaseController {
 
     @RequestMapping(value = "loans", method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<LoanDetails> create(@RequestBody @Valid LoanDetails request) {
-        return new ResponseEntity<LoanDetails>(loanService.create(request), HttpStatus.CREATED);
+    public ResponseEntity<LoanDetailsResponse> create(@RequestBody @Valid LoanDetailsRequest request) {
+        return new ResponseEntity<LoanDetailsResponse>(loanService.create(request), HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "loans/{loanId}", method = RequestMethod.PUT)
     @ResponseBody
-    public ResponseEntity<LoanDetails> update(@PathVariable Long loanId, @RequestBody @Valid LoanDetails request) {
-        return new ResponseEntity<LoanDetails>(loanService.update(loanId, request), HttpStatus.OK);
+    public ResponseEntity<LoanDetailsResponse> update(@PathVariable Long loanId, @RequestBody @Valid LoanDetailsRequest request) {
+        return new ResponseEntity<LoanDetailsResponse>(loanService.update(loanId, request), HttpStatus.OK);
     }
 
     @RequestMapping(value = "loans/{loanId}", method = RequestMethod.DELETE)

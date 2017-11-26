@@ -2,17 +2,15 @@ package xyz.platform56.loans.service;
 
 import xyz.platform56.loans.pojo.*;
 
-import java.util.List;
-
 public interface LoanService {
 
     SearchResponse search(String customerName, PaginationSearchRequest searchRequest);
 
-    LoanDetails get(Long loanId);
+    LoanDetailsResponse get(Long loanId);
 
-    LoanDetails create(LoanDetails request);
+    LoanDetailsResponse create(LoanDetailsRequest request);
 
-    LoanDetails update(Long loanId, LoanDetails request);
+    LoanDetailsResponse update(Long loanId, LoanDetailsRequest request);
 
     ScheduleResponse createSchedule(Long loanId, ScheduleRequest request);
 
