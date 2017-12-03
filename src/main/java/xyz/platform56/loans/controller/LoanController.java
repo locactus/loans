@@ -50,11 +50,18 @@ public class LoanController extends BaseController {
         return new ResponseEntity<ScheduleResponse>(loanService.previewSchedule(request), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{loanId}/ids", method = RequestMethod.GET)
+    @RequestMapping(value = "loans/{loanId}/schedules", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<ScheduleResponse> fetchSchedule(@PathVariable Long loanId) {
         return new ResponseEntity<ScheduleResponse>(loanService.fetchSchedule(loanId), HttpStatus.OK);
     }
+
+    @RequestMapping(value = "loans/{loanId}/pay", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<PaymentResponse> payLoan(@PathVariable Long loanId, PaymentRequest request) {
+        return new ResponseEntity<PaymentResponse>(loanService.payLoan(loanId, request), HttpStatus.OK);
+    }
+
 
     @RequestMapping(value = "loans", method = RequestMethod.POST)
     @ResponseBody

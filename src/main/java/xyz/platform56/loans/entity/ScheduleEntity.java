@@ -17,9 +17,6 @@ import java.util.List;
 public class ScheduleEntity extends DomainObject {
 
 
-    @Column(name = "external_ref", nullable = false, length = 100)
-    private String externalRef;
-
     @Column(name="include_sat", columnDefinition = "tinyint default false")
     private Boolean includeSat = false;
 

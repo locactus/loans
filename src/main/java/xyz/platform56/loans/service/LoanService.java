@@ -18,5 +18,7 @@ public interface LoanService {
 
     ScheduleResponse fetchSchedule(Long loanId);
 
+    PaymentResponse payLoan(Long loanId, PaymentRequest request);
+
     void delete(Long loanId);
 }

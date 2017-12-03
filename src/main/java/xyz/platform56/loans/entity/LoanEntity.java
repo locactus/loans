@@ -41,6 +41,14 @@ public class LoanEntity extends DomainObject {
     @Column(name = "release_date", length = 100)
     private Date releaseDate;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "loan_payment_id",
+            referencedColumnName = "id",
+            foreignKey = @ForeignKey(name = "loan_payment_id_pk")
+    )
+    private List<LoanPaymentEntity> loanPayments;
+
+
     public enum Paths {
         loanRef
     }

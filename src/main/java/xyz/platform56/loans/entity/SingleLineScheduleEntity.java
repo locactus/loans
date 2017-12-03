@@ -20,6 +20,9 @@ public class SingleLineScheduleEntity extends DomainObject {
     @Column(name = "payment_date", nullable = false, length = 100)
     private LocalDate paymentDate;
 
+    @Column(name = "payment_on", nullable = false, length = 100)
+    private LocalDate paidOn;
+
     @Column(name = "amount", nullable = false, length = 100)
     private Double amount;
 

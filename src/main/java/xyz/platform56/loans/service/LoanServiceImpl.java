@@ -1,25 +1,32 @@
 package xyz.platform56.loans.service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import xyz.platform56.loans.component.DateComponent;
 import xyz.platform56.loans.entity.LoanEntity;
+import xyz.platform56.loans.entity.LoanPaymentEntity;
 import xyz.platform56.loans.entity.ScheduleEntity;
+import xyz.platform56.loans.entity.SingleLineScheduleEntity;
 import xyz.platform56.loans.exception.ApiException;
 import xyz.platform56.loans.exception.NotFoundException;
 import xyz.platform56.loans.pojo.*;
 
+import xyz.platform56.loans.repository.LoanPaymentRepository;
 import xyz.platform56.loans.repository.LoanRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import xyz.platform56.loans.repository.ScheduleRepository;
+import xyz.platform56.loans.repository.SingleLineScheduleRepository;
 import xyz.platform56.loans.utils.ModelMapperBasedTransformer;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -29,6 +36,15 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Autowired
     private LoanRepository loanRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private LoanPaymentRepository loanPaymentRepository;
+
+    @Autowired
+    private SingleLineScheduleRepository singleLineScheduleRepository;
 
 
     @Autowired
@@ -90,10 +106,21 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     @Override
     public ScheduleResponse createSchedule(Long loanId, ScheduleRequest request) {
         ScheduleResponse previewSchedule = this.previewSchedule(request);
-        ScheduleEntity scheduleEntity = modelMapper.map(previewSchedule, ScheduleEntity.class);
+        ScheduleEntity scheduleEntity = null;
+        scheduleEntity = modelMapper.map(previewSchedule, ScheduleEntity.class);
+        scheduleEntity = scheduleRepository.save(scheduleEntity);
 
-        log.info("XX");
-        return null;
+        List<SingleLineScheduleEntity> lineScheduleEntities = Lists.newArrayList();
+         for (LineSchedule lineSchedule: previewSchedule.getSchedules()) {
+             SingleLineScheduleEntity singleLineScheduleEntity = modelMapper.map(lineSchedule, SingleLineScheduleEntity.class);
+             singleLineScheduleEntity.setSchedule(scheduleEntity);
+             lineScheduleEntities.add(singleLineScheduleEntity);
+         }
+        lineScheduleEntities = ImmutableList.copyOf(singleLineScheduleRepository.save(lineScheduleEntities));
+        scheduleEntity.setSingleLineSchedules(lineScheduleEntities);
+        scheduleEntity = scheduleRepository.save(scheduleEntity);
+
+        return  modelMapper.map(scheduleEntity, ScheduleResponse.class);
     }
 
     @Override
@@ -143,7 +170,28 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Override
     public ScheduleResponse fetchSchedule(Long loanId) {
-        return null;
+        ScheduleEntity scheduleEntity = scheduleRepository.findOne(loanId);
+        return modelMapper.map(scheduleEntity, ScheduleResponse.class);
+    }
+
+    @Override
+    public PaymentResponse payLoan(Long loanId, PaymentRequest request) {
+        LoanEntity loanEntity =  loanRepository.findOne(loanId);
+        LoanPaymentEntity loanPaymentEntity = null;
+        try {
+
+            loanPaymentEntity = modelMapper.map(request, LoanPaymentEntity.class);
+            loanPaymentEntity.setLoan(loanEntity);
+            loanPaymentEntity = loanPaymentRepository.save(loanPaymentEntity);
+
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            if (ex.getMostSpecificCause().toString().contains("ConstraintViolation")) {
+                throw new ApiException("400", ex.getMostSpecificCause().toString());
+            } else {
+                throw new ApiException("400", "Invalid Data");
+            }
+        }
+        return modelMapper.map(loanPaymentEntity, PaymentResponse.class);
     }
 
 
