@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
+import java.util.List;
 
 @RequestMapping("/api/v1")
 @RestController
@@ -56,10 +57,16 @@ public class LoanController extends BaseController {
         return new ResponseEntity<ScheduleResponse>(loanService.fetchSchedule(loanId), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{loanId}/pay", method = RequestMethod.POST)
+    @RequestMapping(value = "loans/{loanId}/pay", method = RequestMethod.PUT)
     @ResponseBody
     public ResponseEntity<PaymentResponse> payLoan(@PathVariable Long loanId, PaymentRequest request) {
         return new ResponseEntity<PaymentResponse>(loanService.payLoan(loanId, request), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "loans/{loanId}/payments", method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity<List<PaymentResponse>> getPayments(@PathVariable Long loanId) {
+        return new ResponseEntity<List<PaymentResponse>>(loanService.getPayments(loanId), HttpStatus.OK);
     }
 
 

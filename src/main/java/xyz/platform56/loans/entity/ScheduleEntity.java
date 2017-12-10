@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -39,11 +40,11 @@ public class ScheduleEntity extends DomainObject {
     private double interestRate = 15.0;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "single_schedule_id",
+    @JoinColumn(name = "schedule_id",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "single_schedule_id_pk")
     )
-    private List<SingleLineScheduleEntity> singleLineSchedules;
+    private Collection<SingleLineScheduleEntity> singleLineSchedules;
 
     public enum Paths {
         loanRef

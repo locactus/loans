@@ -17,19 +17,19 @@ import java.util.Date;
 public class SingleLineScheduleEntity extends DomainObject {
 
 
-    @Column(name = "payment_date", nullable = false, length = 100)
-    private LocalDate paymentDate;
+    @Column(name = "payment_date", nullable = true, length = 100)
+    private Date paymentDate;
 
-    @Column(name = "payment_on", nullable = false, length = 100)
-    private LocalDate paidOn;
+    @Column(name = "payment_on", nullable = true, length = 100)
+    private Date paidOn;
 
-    @Column(name = "amount", nullable = false, length = 100)
+    @Column(name = "amount", nullable = true, length = 100)
     private Double amount;
 
-    @Column(name = "status", nullable = false, length = 100)
+    @Column(name = "status", nullable = true, length = 100)
     private String status;
 
-    @JoinColumn(name = "customer_id",
+    @JoinColumn(name = "schedule_id",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "single_schedule_schedule_id_pk")
     )

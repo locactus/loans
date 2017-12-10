@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import xyz.platform56.loans.component.DateComponent;
 import xyz.platform56.loans.entity.LoanEntity;
 import xyz.platform56.loans.entity.LoanPaymentEntity;
@@ -23,9 +24,11 @@ import xyz.platform56.loans.repository.ScheduleRepository;
 import xyz.platform56.loans.repository.SingleLineScheduleRepository;
 import xyz.platform56.loans.utils.ModelMapperBasedTransformer;
 
+import java.lang.reflect.Type;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -111,16 +114,20 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
         scheduleEntity = scheduleRepository.save(scheduleEntity);
 
         List<SingleLineScheduleEntity> lineScheduleEntities = Lists.newArrayList();
-         for (LineSchedule lineSchedule: previewSchedule.getSchedules()) {
-             SingleLineScheduleEntity singleLineScheduleEntity = modelMapper.map(lineSchedule, SingleLineScheduleEntity.class);
-             singleLineScheduleEntity.setSchedule(scheduleEntity);
-             lineScheduleEntities.add(singleLineScheduleEntity);
-         }
-        lineScheduleEntities = ImmutableList.copyOf(singleLineScheduleRepository.save(lineScheduleEntities));
+        for (LineSchedule lineSchedule : previewSchedule.getSchedules()) {
+            SingleLineScheduleEntity singleLineScheduleEntity = modelMapper.map(lineSchedule, SingleLineScheduleEntity.class);
+            singleLineScheduleEntity.setSchedule(scheduleEntity);
+            lineScheduleEntities.add(singleLineScheduleEntity);
+        }
+        Iterable<SingleLineScheduleEntity> savedLineSchedules = singleLineScheduleRepository.save(lineScheduleEntities);
+        lineScheduleEntities.clear();
+        for (SingleLineScheduleEntity singleLineScheduleEntity : savedLineSchedules) {
+            lineScheduleEntities.add(singleLineScheduleEntity);
+        }
         scheduleEntity.setSingleLineSchedules(lineScheduleEntities);
         scheduleEntity = scheduleRepository.save(scheduleEntity);
 
-        return  modelMapper.map(scheduleEntity, ScheduleResponse.class);
+        return modelMapper.map(scheduleEntity, ScheduleResponse.class);
     }
 
     @Override
@@ -143,7 +150,7 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
                 dayOfWeeks, holidayDates);
 
         // Computation of InterestRate
-        double interestAmount = request.getPrincipal() *  (request.getInterestRate() / 100);
+        double interestAmount = request.getPrincipal() * (request.getInterestRate() / 100);
         double theNewPrincipal = request.getPrincipal() + interestAmount;
         double perDayAmount = theNewPrincipal / request.getNumberOfDays();
 
@@ -176,10 +183,9 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
     @Override
     public PaymentResponse payLoan(Long loanId, PaymentRequest request) {
-        LoanEntity loanEntity =  loanRepository.findOne(loanId);
+        LoanEntity loanEntity = loanRepository.findOne(loanId);
         LoanPaymentEntity loanPaymentEntity = null;
         try {
-
             loanPaymentEntity = modelMapper.map(request, LoanPaymentEntity.class);
             loanPaymentEntity.setLoan(loanEntity);
             loanPaymentEntity = loanPaymentRepository.save(loanPaymentEntity);
@@ -192,6 +198,14 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
             }
         }
         return modelMapper.map(loanPaymentEntity, PaymentResponse.class);
+    }
+
+    @Override
+    public List<PaymentResponse> getPayments(Long loanId) {
+        List<LoanPaymentEntity> loanPaymentListEntity = loanPaymentRepository.findByLoanId(loanId);
+        Type targetListType = new TypeToken<List<PaymentResponse>>() {
+        }.getType();
+        return modelMapper.map(loanPaymentListEntity, targetListType);
     }
 
 
