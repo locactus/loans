@@ -26,7 +26,7 @@ public class LoanRepositoryImpl implements LoanRepositoryCustom {
     private EntityManager em;
 
     @Override
-    public SearchResponse<LoanEntity> search(String loanRef, PaginationSearchRequest searchRequest) {
+    public SearchResponse<LoanEntity> search(String loanRef, String status, PaginationSearchRequest searchRequest) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<LoanEntity> query = cb.createQuery(LoanEntity.class);
         List<Predicate> conditions = Lists.newArrayList();

@@ -1,6 +1,5 @@
 package xyz.platform56.loans.service;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
@@ -67,8 +66,8 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
 
 
     @Override
-    public SearchResponse search(String customerName, PaginationSearchRequest searchRequest) {
-        SearchResponse<LoanEntity> searchResponse = loanRepository.search(customerName, searchRequest);
+    public SearchResponse search(String loanRef, String status, PaginationSearchRequest searchRequest) {
+        SearchResponse<LoanEntity> searchResponse = loanRepository.search(loanRef, status, searchRequest);
         return searchResponseConverter.buildSearchResponse(searchResponse, loanEntityToLoanDetailsModelMapperBasedTransformer);
     }
 
@@ -213,7 +212,8 @@ public class LoanServiceImpl extends AbstractService implements LoanService {
     public void delete(Long entityId) {
         LoanEntity entityDataEntity = loanRepository.findOne(entityId);
         checkEntity(entityDataEntity);
-        loanRepository.delete(entityId);
+        entityDataEntity.setStatus("DELETED");
+        loanRepository.save(entityDataEntity);
     }
 
 

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LoanRepositoryCustom {
 
-    SearchResponse<LoanEntity> search(String customerName, PaginationSearchRequest searchRequest);
+    SearchResponse<LoanEntity> search(String loanRef, String status, PaginationSearchRequest searchRequest);
 
 }

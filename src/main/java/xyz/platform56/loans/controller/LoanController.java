@@ -28,8 +28,9 @@ public class LoanController extends BaseController {
     @ResponseBody
     public ResponseEntity<SearchResponse> search(
             @RequestParam(value = "loanRef", required = false, defaultValue = "") String loanRef,
+            @RequestParam(value = "status", required = false, defaultValue = "") String status,
             @ModelAttribute @Valid PaginationSearchRequest searchRequest) {
-        return new ResponseEntity<SearchResponse>(loanService.search(loanRef, searchRequest), HttpStatus.OK);
+        return new ResponseEntity<SearchResponse>(loanService.search(loanRef, status, searchRequest), HttpStatus.OK);
     }
 
     @RequestMapping(value = "loans/{loanId}", method = RequestMethod.GET)
@@ -63,7 +64,7 @@ public class LoanController extends BaseController {
         return new ResponseEntity<PaymentResponse>(loanService.payLoan(loanId, request), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "loans/{loanId}/payments", method = RequestMethod.PUT)
+    @RequestMapping(value = "loans/{loanId}/payments", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<List<PaymentResponse>> getPayments(@PathVariable Long loanId) {
         return new ResponseEntity<List<PaymentResponse>>(loanService.getPayments(loanId), HttpStatus.OK);

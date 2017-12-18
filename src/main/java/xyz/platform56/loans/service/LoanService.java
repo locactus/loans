@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface LoanService {
 
-    SearchResponse search(String customerName, PaginationSearchRequest searchRequest);
+    SearchResponse search(String loanRef, String status, PaginationSearchRequest searchRequest);
 
     LoanDetailsResponse get(Long loanId);
 
